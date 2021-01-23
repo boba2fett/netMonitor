@@ -1,0 +1,9 @@
+{
+    "env":"prod",
+    "bot_token":"",
+    "chat_id":,
+    "db_connection":"sqlite:///netMonitor.db",
+    "network":"192.168.178.0/24",
+    "hostname_replace":".fritz.box",
+    "auth":""
+}

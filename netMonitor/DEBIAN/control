@@ -1,0 +1,8 @@
+Package: netMonitor
+Version: 1.0-0
+Section: base
+Priority: optional
+Architecture: all
+Depends: python3
+Maintainer: b2f3t <boba2002fett@gmail.com>
+Description: Notify yourself on a device going online in your network

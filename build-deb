@@ -1,0 +1,15 @@
+#!/bin/bash
+rm -r netMonitor/etc/netMonitor/__pycache__
+dpkg-deb --build netMonitor/ netMonitorPRIV.deb
+
+mv netMonitor/etc/netMonitor/netMonitor.db netMonitor.db
+mv netMonitor/etc/netMonitor/config.dev.json config.dev.json
+mv netMonitor/etc/netMonitor/config.json config.json
+mv netMonitor/etc/netMonitor/config.json.template netMonitor/etc/netMonitor/config.json
+
+dpkg-deb --build netMonitor/ netMonitor.deb
+
+mv netMonitor/etc/netMonitor/config.json netMonitor/etc/netMonitor/config.json.template
+mv config.json netMonitor/etc/netMonitor/config.json
+mv config.dev.json netMonitor/etc/netMonitor/config.dev.json
+mv netMonitor.db netMonitor/etc/netMonitor/netMonitor.db
