@@ -23,9 +23,9 @@ def mainloop():
                 dbApi.dbCollect(data,timestamp)
                 try:
                     send.sendCheck(dbApi,lastTimestamp,timestamp)
-                    lastTimestamp=timestamp
                 except Exception as e:
                     send.sendError(f"Possible sending messages unsuccesful, because of {str(e)}")
+                lastTimestamp=timestamp
             except Exception as e:
                 send.sendError(f"DataCollection unsuccesful, because of {str(e)}")
         except Exception as e:

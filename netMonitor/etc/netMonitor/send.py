@@ -11,7 +11,10 @@ class Send():
         self.admin_chat = CONFIG["admin_chat_id"]
     
     def sendInitial(self, msg):
-        self.bot.sendMessage(chat_id=self.admin_chat, text=msg)
+        try:
+            self.bot.sendMessage(chat_id=self.admin_chat, text=msg)
+        except:
+            self.bot.sendMessage(chat_id=self.admin_chat, text=msg)
 
     def sendError(self, error):
         msg=f'{datetime.datetime.now()}\n{error}'
@@ -24,8 +27,11 @@ class Send():
     def send(self, msg, chat_id):
         try:
             self.bot.sendMessage(chat_id=chat_id, text=msg)
-        except Exception as ex:
-            self.sendError(ex)
+        except:
+            try:
+                self.bot.sendMessage(chat_id=chat_id, text=msg)
+            except Exception as ex:
+                self.sendError(ex)
 
     def sendAll(self, msg, chat_ids):
         if chat_ids:
@@ -38,10 +44,11 @@ class Send():
             lastDevices=[x[0] for x in lastDevices]
         devices = dbApi.devicesAt(timestamp)
         if devices:
-            devices=[x[0] for x in devices]
-            for device in devices:
+            for device,ip in devices:
                 if device not in lastDevices:
                     sendTo=dbApi.subscribers(device)
                     if sendTo:
                         sendTo=[x[0] for x in sendTo]
                         self.sendAll(f"{device} is back", sendTo)
+                if not dbApi.existsBefore(device,ip,timestamp):
+                    self.sendInitial(f"new device\n{ip}\n{device}")

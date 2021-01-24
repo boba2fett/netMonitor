@@ -72,7 +72,23 @@ class DbApi():
         return dataend
     
     def devicesAt(self, timestamp):
-        return self.conn.execute(select([self.network.c.device_name]).where(self.network.c.timestamp==timestamp))
+        return self.conn.execute(select([self.network.c.device_name, self.network.c.ip]).where(self.network.c.timestamp==timestamp))
+
+    def devicesIpsBefore(self, timestamp):
+        return self.conn.execute(select([self.network.c.device_name, self.network.c.ip]).where(self.network.c.timestamp<timestamp))
+
+    def existsBefore(self,device_name, ip, timestamp):
+        req = self.conn.execute(select([self.network.c.device_name, self.network.c.ip])
+            .where(self.network.c.timestamp<timestamp)
+            .where(self.network.c.device_name==device_name)
+            .where(self.network.c.ip==ip)
+            .count()
+        )
+        if req:
+            req=list(req)
+            return req[0][0]==1
+        return False
+
 
     def users(self):
         return self.conn.execute(select([self.network.c.ip, self.network.c.device_name]).distinct())
