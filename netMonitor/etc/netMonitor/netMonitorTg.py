@@ -24,6 +24,7 @@ def main():
     dp.add_handler(CommandHandler('help', handler.help))
     dp.add_handler(CommandHandler('info', handler.info))
     dp.add_handler(CommandHandler('status', handler.status))
+    dp.add_handler(CommandHandler('all', handler.all))
     dp.add_handler(CommandHandler('echo', handler.echo))
     dp.add_handler(CommandHandler('subscribe', handler.subscribe))
     dp.add_handler(CommandHandler('unsubscribe', handler.unsubscribe))

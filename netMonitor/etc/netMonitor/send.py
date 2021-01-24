@@ -8,7 +8,7 @@ import datetime
 class Send():
     def __init__(self):
         self.bot = telegram.Bot(token=CONFIG["bot_token"])
-        self.admin_chat = CONFIG["chat_id"]
+        self.admin_chat = CONFIG["admin_chat_id"]
     
     def sendInitial(self, msg):
         self.bot.sendMessage(chat_id=self.admin_chat, text=msg)

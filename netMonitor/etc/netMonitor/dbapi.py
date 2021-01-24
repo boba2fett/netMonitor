@@ -21,29 +21,32 @@ class DbApi():
         'subscribe', meta,
         Column('timestamp', DateTime(timezone=True)),
         Column('chat_id', String, primary_key=True),
-        Column('net_device', String, primary_key=True),
-        Column('username', String),
-        Column('first_name', String),
-        Column('last_name', String)
+        Column('net_device', String, primary_key=True)
         )
 
         self.auth = Table(
         'auth', meta,
         Column('timestamp', DateTime(timezone=True)),
-        Column('chat_id', String, primary_key=True)
+        Column('chat_id', String, primary_key=True),
+        Column('username', String),
+        Column('first_name', String),
+        Column('last_name', String)
         )
 
         meta.create_all(self.engine)
         self.conn = self.engine.connect()
 
-    def authenticate(self,chat_id):
+    def authenticate(self, chat_id, username, first_name, last_name):
         self.conn.execute(self.auth.insert(None).values(
                 timestamp=datetime.now(),
-                chat_id=chat_id
+                chat_id=chat_id,
+                username = username,
+                first_name = first_name,
+                last_name = last_name
             )
         )
 
-    def authenticated(self,chat_id):
+    def authenticated(self, chat_id):
         req = self.conn.execute(self.auth.select()
             .where(self.auth.c.chat_id==chat_id).count()
         )
@@ -91,15 +94,12 @@ class DbApi():
             .where(self.subscribe.c.net_device==device_name)
         )
 
-    def newSubscriber(self, chat_id,device_name, username, first_name, last_name):
+    def newSubscriber(self, chat_id,device_name):
         self.conn.execute(self.subscribe.insert(None)
             .values(
                 timestamp=datetime.now(),
                 chat_id = chat_id,
-                net_device = device_name,
-                username = username,
-                first_name = first_name,
-                last_name = last_name
+                net_device = device_name
             )
         )
     
@@ -131,7 +131,8 @@ class DbApi():
             dataend = self.conn.execute(select([self.network.c.timestamp]).order_by(self.network.c.timestamp.desc())).first()
             if dataend:
                 dataend=dataend[0]
-            actual_subscribtions = self.conn.execute(select([self.subscribe.c.username,self.subscribe.c.net_device]))
+            j = self.auth.join(self.subscribe, self.auth.c.chat_id==self.subscribe.c.chat_id)
+            actual_subscribtions = self.conn.execute(select([self.auth.c.username,self.subscribe.c.net_device]).select_from(j))
             if actual_subscribtions:
                 actual_subscribtions = "\n".join([f"{x[0]} -> {x[1]}" for x in actual_subscribtions])
 
@@ -151,3 +152,9 @@ subsriptions:
 current:
 {now_online}
 """
+
+    def getAllDevices(self):
+            now_online = self.conn.execute(select([self.network.c.ip, self.network.c.device_name]).distinct().order_by(self.network.c.ip))
+            if now_online:
+                now_online = "\n".join([f"{x[0]}: {x[1]}" for x in now_online])
+            return now_online

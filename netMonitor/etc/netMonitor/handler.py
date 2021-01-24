@@ -32,13 +32,16 @@ last_name: {last_name}
 def auth(update, context):
     chat_id=update.effective_chat.id
     text=update.message.text
+    username = update.effective_user.username
+    first_name = update.effective_user.first_name
+    last_name = update.effective_user.last_name
     if "/auth " in text:
         auth = text.replace("/auth ","")
         if auth == CONFIG["auth"]:
             try:
                 dbApi=DbApi()
-                dbApi.authenticate(chat_id)
-                msg="Success!"
+                dbApi.authenticate(chat_id, username, first_name, last_name)
+                msg="Success! Please delete your message!"
             except Exception as ex:
                 msg=f"Could not auth"+f"\n{CONFIG['env']}: because of {ex}" if CONFIG["env"]=="dev" else ""
         else:
@@ -50,7 +53,7 @@ def auth(update, context):
 def status(update, context):
     chat_id = update.effective_chat.id
     if allowed(chat_id):
-        if chat_id == CONFIG["chat_id"]:
+        if chat_id == CONFIG["admin_chat_id"]:
             dbApi=DbApi()
             msg = dbApi.adminStatus()
             context.bot.send_message(text=msg,chat_id=chat_id)
@@ -58,9 +61,20 @@ def status(update, context):
             msg = "Oh this is not the right channel"
             context.bot.send_message(text=msg,chat_id=chat_id)
 
+def all(update, context):
+    chat_id = update.effective_chat.id
+    if allowed(chat_id):
+        if chat_id == CONFIG["admin_chat_id"]:
+            dbApi=DbApi()
+            msg = dbApi.getAllDevices()
+            context.bot.send_message(text=msg,chat_id=chat_id)
+        else:
+            msg = "Oh this is not the right channel"
+            context.bot.send_message(text=msg,chat_id=chat_id)
+
 def on_error(update, context):
     print(f"Error: {context.error}")
-    context.bot.send_message(text=f"Tg Error: {context.error}",chat_id=CONFIG["chat_id"])
+    context.bot.send_message(text=f"Tg Error: {context.error}",chat_id=CONFIG["admin_chat_id"])
 
 def subscribtions(update, context):
     chat_id = update.effective_chat.id
@@ -72,16 +86,13 @@ def subscribtions(update, context):
 def subscribe(update, context):
     chat_id = update.effective_chat.id
     if allowed(chat_id):
-        username = update.effective_user.username
-        first_name = update.effective_user.first_name
-        last_name = update.effective_user.last_name
         text=update.message.text
         if "/subscribe " in text:
             name = text.replace("/subscribe ","")
             if name:
                 try:
                     dbApi=DbApi()
-                    dbApi.newSubscriber(chat_id,name, username, first_name, last_name)
+                    dbApi.newSubscriber(chat_id,name)
                     msg=f"Subscribed to: {name}"
                 except Exception as ex:
                     msg=f"Could not subscribe to: {name}\nCheck your /subsribtions"+f"\n{CONFIG['env']}: because of {ex}" if CONFIG["env"]=="dev" else ""
@@ -93,7 +104,7 @@ def subscribe(update, context):
 
 def allowed(chat_id):
     dbApi=DbApi()
-    return dbApi.authenticated(chat_id) or chat_id == CONFIG["chat_id"]
+    return dbApi.authenticated(chat_id) or chat_id == CONFIG["admin_chat_id"]
 
 def unsubscribe(update, context):
     chat_id = update.effective_chat.id
