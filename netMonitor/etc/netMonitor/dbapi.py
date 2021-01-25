@@ -86,7 +86,7 @@ class DbApi():
         )
         if req:
             req=list(req)
-            return req[0][0]==1
+            return req[0][0]>0
         return False
 
 
